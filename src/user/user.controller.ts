@@ -1,11 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { UserSignUpDTO } from './dto/user-singup.dto';
 import { UserSignInDto } from './dto/user-singin.dto';
-import { CurrentUser } from 'src/utils/common/decorators/current-user.decorator';
+import { CurrentUser } from 'src/utils/decorators/current-user.decorator';
+import { AuthorizationGuard } from 'src/utils/gurads/authorization.guard';
+import { request } from 'express';
+import { AuthenticationGuard } from 'src/utils/gurads/authentication.guard';
+import { AuthorizedRoles } from 'src/utils/decorators/authorize-roles.decorator';
+import { Roles } from 'src/utils/common/user-roles.enum';
 
 @Controller('user')
 export class UserController {
@@ -18,7 +23,6 @@ export class UserController {
 }>{
     const user = await this.userService.userSignIn(userSingInDto);
     const accessToken = await this.userService.getAccessToken(user);
-    console.log(accessToken);
     return { accessToken, user };
   }
 
@@ -32,8 +36,11 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
+  @AuthorizedRoles(Roles.ADMIN)
+  @UseGuards(AuthenticationGuard,AuthorizationGuard)
+  @Get('getAll')
   async findAll(): Promise<UserEntity[]> {
+    console.log(request.currentUser)
     return await this.userService.findAll();
   }
 
@@ -52,11 +59,11 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @Get('me')
-  getProfile(@CurrentUser() currentUser: UserEntity){
+  @UseGuards(AuthorizationGuard)
+  @Get('profile')
+  getProfile(@CurrentUser() currentUser: Partial<UserEntity>):Partial<UserEntity>{
     console.log('current User is in controller')
-    console.log(currentUser)
     return currentUser;
+    
   }
 }
-9
