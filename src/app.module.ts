@@ -8,6 +8,8 @@ import { truncate } from 'fs';
 import { CurrentUserMiddleware } from './utils/middlewares/current-user.middleware';
 import { CategoriesModule } from './categories/categories.module';
 import { UserController } from './user/user.controller';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 
 dotenv.config();
@@ -17,8 +19,12 @@ config()
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-    })
-    , TypeOrmModule.forRootAsync({
+    }),
+    ThrottlerModule.forRoot([{
+      ttl: 10,
+      limit: 3,
+    }]),
+    TypeOrmModule.forRootAsync({
       imports: [],
       inject: [],
       useFactory: () => ({
@@ -31,11 +37,15 @@ config()
         autoLoadEntities: true,
         synchronize: true,
       })
-
-    })
-    , UserModule, CategoriesModule],
+    }),
+    UserModule, CategoriesModule],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
@@ -47,6 +57,6 @@ export class AppModule {
     //     path: 'api/v1/user/signUp', method: RequestMethod.POST
 
     //   })
-      .forRoutes(UserController)
+      .forRoutes('*')
   }
 }

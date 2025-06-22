@@ -44,7 +44,9 @@ export class UserService {
   async getAccessToken(user: Partial<UserEntity>):Promise<string>{
     const secret = this.configService.get('ACCESS_TOKEN_SECRET_KEY');
     const expiresIn = this.configService.get('ACCESS_TOKEN_EXPIRY_TIME');
-    const accessToken = sign({ id:user.id, email: user.email },secret, { expiresIn });
+    const payload = { id: Number(user.id), email: user.email };
+    console.log('Signing JWT with payload:', payload);
+    const accessToken = sign(payload, secret, { expiresIn });
     console.log(accessToken);
     return accessToken;
     
@@ -54,9 +56,8 @@ export class UserService {
     return 'This action adds a new user';
   }
 
-  async findAll(): Promise<UserEntity[]> {
-    const users = await this.userRepository.find();
-    return users;
+  findAll(){
+    return "";  
   }
 
   async findOne(id: number): Promise<UserEntity> {

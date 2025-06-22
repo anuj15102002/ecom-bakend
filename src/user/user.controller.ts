@@ -39,12 +39,12 @@ export class UserController {
   @AuthorizedRoles(Roles.ADMIN)
   @UseGuards(AuthenticationGuard,AuthorizationGuard)
   @Get('getAll')
-  async findAll(): Promise<UserEntity[]> {
+  findAll() {
     console.log(request.currentUser)
-    return await this.userService.findAll();
+    return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get('get/:id')
   async findOne(@Param('id') id: string) {
     return await this.userService.findOne(+id);
   }
@@ -59,10 +59,9 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-  @UseGuards(AuthorizationGuard)
   @Get('profile')
-  getProfile(@CurrentUser() currentUser: Partial<UserEntity>):Partial<UserEntity>{
-    console.log('current User is in controller')
+  getProfile(@CurrentUser() currentUser: Partial<UserEntity>): Partial<UserEntity> {
+    console.log('current User is in controller', currentUser);
     return currentUser;
     
   }

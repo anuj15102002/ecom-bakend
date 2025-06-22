@@ -24,7 +24,7 @@ export class CurrentUserMiddleware implements NestMiddleware {
         private readonly userService: UserService
     ) { }
     async use(req: Request, res: Response, next: NextFunction) {
-
+        console.log('Middleware for route:', req.method, req.originalUrl);
         console.log('start')
         const authHeader = req.headers.authorization || req.headers.authorization;
         const secretToken = await this.configService.get('ACCESS_TOKEN_SECRET_KEY')
@@ -44,10 +44,15 @@ export class CurrentUserMiddleware implements NestMiddleware {
                     id: number;
                     email: string;
                 };
-              
-                console.log('type of id is ' + typeof payload.id);
-                const id = payload.id;
-
+                console.log('JWT payload:', payload);
+                const id = Number(payload.id);
+                console.log('Extracted id:', id, 'from payload.id:', payload.id);
+                if (!id || isNaN(id)) {
+                    req.currentUser = null;
+                    console.log('Invalid user id in token payload:', payload.id);
+                    next();
+                    return;
+                }
                 const user = await this.userService.findOne(id);
                 if (!user) {
                     req.currentUser = null;
