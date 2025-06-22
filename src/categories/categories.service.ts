@@ -42,8 +42,12 @@ export class CategoriesService {
     
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity> {
+    let categoryExists = await this.categoryRepository.findOne({where: {id: id}})
+    if(!categoryExists)throw new BadRequestException('Category does not exist');
+
+    Object.assign(categoryExists,updateCategoryDto);
+    return await this.categoryRepository.save(categoryExists);
   }
 
   remove(id: number) {

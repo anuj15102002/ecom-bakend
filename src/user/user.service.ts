@@ -75,6 +75,10 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
+  async signOut():Promise<{message: string}>{
+    return {message: "SignOut successful."}
+  }
+
   async findUserByEmail(email:string){
     return await this.userRepository.findOneBy({email});
   }

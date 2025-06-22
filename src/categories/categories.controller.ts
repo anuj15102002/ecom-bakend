@@ -3,11 +3,17 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { AuthorizedRoles } from 'src/utils/decorators/authorize-roles.decorator';
+import { AuthenticationGuard } from 'src/utils/gurads/authentication.guard';
+import { AuthorizationGuard } from 'src/utils/gurads/authorization.guard';
+import { Roles } from 'src/utils/common/user-roles.enum';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @AuthorizedRoles(Roles.ADMIN)
+  @UseGuards(AuthenticationGuard,AuthorizationGuard)
   @Post('/createCategory')
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -59,10 +59,20 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
+  @UseGuards(AuthenticationGuard)
+  @Post('signOut')
+  async signOut(@Req() req: any): Promise<{ message: string }> {
+    const token = req.headers.authorization.split(' ')[1];
+    return this.userService.signOut(token);
+  }
+
+  @UseGuards(AuthenticationGuard)
   @Get('profile')
   getProfile(@CurrentUser() currentUser: Partial<UserEntity>): Partial<UserEntity> {
     console.log('current User is in controller', currentUser);
     return currentUser;
     
   }
+
+  
 }
