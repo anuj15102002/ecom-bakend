@@ -1,6 +1,6 @@
 import { CategoryEntity } from "src/categories/entities/category.entity";
 import { Roles } from "src/utils/common/user-roles.enum";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -11,6 +11,7 @@ export class UserEntity {
     @Column()
     name: string;
 
+    @Index()
     @Column({unique:true})
     email: string;
 

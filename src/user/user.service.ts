@@ -19,12 +19,13 @@ export class UserService {
   constructor(@InjectRepository(UserEntity)private userRepository: Repository<UserEntity>,
    private readonly configService: ConfigService){}
 
-  async userSignIn(userSignInDto:UserSignInDto):Promise<Partial<UserEntity>>{
-    const userExists = await this.userRepository.createQueryBuilder('users')
-    .addSelect('users.password')
-    .where('users.email= :email', {email:userSignInDto.email})
-    .getOne();
-    if(!userExists)throw new BadRequestException('User does not Exists.');
+  async userSignIn(userSignInDto: UserSignInDto): Promise<Partial<UserEntity>> {
+    const userExists = await this.userRepository
+      .createQueryBuilder('users')
+      .select(['users.id', 'users.email', 'users.password', 'users.role'])
+      .where('users.email= :email', { email: userSignInDto.email })
+      .getOne();
+    if (!userExists) throw new BadRequestException('User does not Exists.');
     const matchedPassword = await bcrypt.compare(userSignInDto.password,userExists.password)
     if(!matchedPassword)throw new BadRequestException('Bad Credentials');
     const { password, ...result } = userExists;
@@ -56,8 +57,23 @@ export class UserService {
     return 'This action adds a new user';
   }
 
-  findAll(){
-    return "";  
+  async findAll(query: {
+    page: number;
+    limit: number;
+  }): Promise<{
+    users: Partial<UserEntity>[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { page = 1, limit = 10 } = query;
+    const [users, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      select: ['id', 'name', 'email', 'role', 'createdDate', 'updatedDate'],
+    });
+
+    return { users, total, page, limit };
   }
 
   async findOne(id: number): Promise<UserEntity> {

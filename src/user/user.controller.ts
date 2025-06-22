@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -37,11 +37,13 @@ export class UserController {
   }
 
   @AuthorizedRoles(Roles.ADMIN)
-  @UseGuards(AuthenticationGuard,AuthorizationGuard)
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
   @Get('getAll')
-  findAll() {
-    console.log(request.currentUser)
-    return this.userService.findAll();
+  findAll(@Query('page') page: string, @Query('limit') limit: string) {
+    return this.userService.findAll({
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+    });
   }
 
   @Get('get/:id')
