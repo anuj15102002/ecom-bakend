@@ -11,35 +11,63 @@ export class CategoriesService {
     @InjectRepository(CategoryEntity) private categoryRepository:Repository<CategoryEntity>,
   ){}
   async create(createCategoryDto: CreateCategoryDto): Promise<CategoryEntity> {
-    
-
-    let categoryExists =  await this.categoryRepository.count({where: {title: createCategoryDto.title}});
-
-    if(categoryExists > 0)throw new BadRequestException('Category laready Exists')
-
-    let cateogry = await this.categoryRepository.create(createCategoryDto);
-    let savedCategory = await this.categoryRepository.save(cateogry);
-
-    return savedCategory;
-    
+    try {
+      let category = this.categoryRepository.create(createCategoryDto);
+      let savedCategory = await this.categoryRepository.save(category);
+      return savedCategory;
+    } catch (error) {
+      if (error.code === '23505') { // Assuming PostgreSQL unique violation code
+        throw new BadRequestException('Category with this title already exists.');
+      }
+      throw error;
+    }
   }
 
-  async findAll(): Promise<CategoryEntity[]> {
-    return await this.categoryRepository.find({
-      select: ['id', 'title', 'description'
-      ]
+  async findAll(query: {
+    page: number;
+    limit: number;
+  }): Promise<{
+    categories: CategoryEntity[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const { page = 1, limit = 10 } = query;
+    const [categories, total] = await this.categoryRepository.findAndCount({
+      relations: ['addedBy'],
+      skip: (page - 1) * limit,
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        addedBy: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     });
+    return { categories, total, page, limit };
   }
 
   async findById(categoryId: number): Promise<CategoryEntity> {
-
     let category = await this.categoryRepository.findOne({
-      where: {id: categoryId},
-      select: ['id', 'title', 'description']
+      where: { id: categoryId },
+      relations: ['addedBy'],
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        addedBy: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     });
-    if(!category)throw new BadRequestException('User does not exist');
+    if (!category) throw new BadRequestException('Category does not exist');
     return category;
-    
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<CategoryEntity> {
@@ -52,9 +80,5 @@ export class CategoriesService {
 
   remove(id: number) {
     return `This action removes a #${id} category`;
-  }
-
-  async findCategoryByTitle(title:string){
-    return this.categoryRepository.findOneBy({title});
   }
 }

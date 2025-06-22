@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -21,8 +21,11 @@ export class CategoriesController {
 
   @Throttle({ default: { ttl: 10000, limit: 3 }})
   @Get('all')
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@Query() query: { page: string; limit: string }) {
+    return this.categoriesService.findAll({
+      page: Number(query.page) || 1,
+      limit: Number(query.limit) || 10,
+    });
   }
 
   

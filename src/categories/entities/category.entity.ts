@@ -1,5 +1,5 @@
 import { UserEntity } from "src/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('categories')
 export class CategoryEntity {
@@ -7,7 +7,8 @@ export class CategoryEntity {
     @PrimaryGeneratedColumn()
     id:number;
 
-    @Column()
+    @Index()
+    @Column({unique: true})
     title:string;
 
     @Column()
