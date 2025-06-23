@@ -3,10 +3,8 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { RevokedTokenEntity } from './entities/revoked-token.entity';
-
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, RevokedTokenEntity])],
+  imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

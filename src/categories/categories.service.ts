@@ -4,22 +4,27 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
 import { Repository } from 'typeorm';
+import { UserEntity } from 'src/user/entities/user.entity';
+
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity) private categoryRepository:Repository<CategoryEntity>,
   ){}
-  async create(createCategoryDto: CreateCategoryDto): Promise<CategoryEntity> {
+  async create(createCategoryDto: CreateCategoryDto, currentUser:UserEntity): Promise<CategoryEntity> {
     try {
+      console.log('hello');
       let category = this.categoryRepository.create(createCategoryDto);
+      category.addedBy=currentUser;
+      console.log("addedBy" + category.addedBy);
+      console.log(currentUser);
       let savedCategory = await this.categoryRepository.save(category);
       return savedCategory;
     } catch (error) {
-      if (error.code === '23505') { // Assuming PostgreSQL unique violation code
+      
         throw new BadRequestException('Category with this title already exists.');
-      }
-      throw error;
+      
     }
   }
 

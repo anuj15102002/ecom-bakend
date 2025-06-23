@@ -18,12 +18,11 @@ export class UserController {
 
   @Post('signIn')
   async singInUser(@Body()userSingInDto:UserSignInDto): Promise<{
-    accessToken: string;
+
     user: Partial<UserEntity>;
 }>{
     const user = await this.userService.userSignIn(userSingInDto);
-    const accessToken = await this.userService.getAccessToken(user);
-    return { accessToken, user };
+    return { user };
   }
 
   @Post('signUp')
@@ -60,13 +59,7 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
-
-  @UseGuards(AuthenticationGuard)
-  @Post('signOut')
-  async signOut(@Req() req: any): Promise<{ message: string }> {
-    const token = req.headers.authorization.split(' ')[1];
-    return this.userService.signOut(token);
-  }
+  
 
   @UseGuards(AuthenticationGuard)
   @Get('profile')
