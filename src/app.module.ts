@@ -10,6 +10,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { UserController } from './user/user.controller';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { ProductsModule } from './products/products.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 
 dotenv.config();
@@ -38,13 +40,16 @@ config()
         synchronize: true,
       })
     }),
-    UserModule, CategoriesModule],
+    UserModule, CategoriesModule, ProductsModule, ReviewsModule,
+    
+  ],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    
   ],
 })
 export class AppModule {

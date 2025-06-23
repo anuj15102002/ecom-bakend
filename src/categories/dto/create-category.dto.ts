@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsPositive, IsPostalCode, IsString } from "class-validator";
 
 export class CreateCategoryDto {
 
@@ -9,5 +9,4 @@ export class CreateCategoryDto {
     @IsNotEmpty({message: 'description cannot be empty'})
     @IsString({message: 'description must be a string'})
     description:string;
-
 }

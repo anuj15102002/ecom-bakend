@@ -10,14 +10,16 @@ import { UserSignInDto } from './dto/user-singin.dto';
 import { sign } from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 
+
 @Injectable()
 export class UserService {
-  signIn(userSingInDto: UserSignInDto) {
+  signIn(userSignInDto: UserSignInDto) {
     throw new Error('Method not implemented.');
   }
 
   constructor(@InjectRepository(UserEntity)private userRepository: Repository<UserEntity>,
-   private readonly configService: ConfigService){}
+   private readonly configService: ConfigService,
+   ){}
 
   async userSignIn(userSignInDto: UserSignInDto): Promise<Partial<UserEntity>> {
     const userExists = await this.userRepository
@@ -39,6 +41,8 @@ export class UserService {
     let user =  this.userRepository.create(userSignUpDto);
     const savedUser = await this.userRepository.save(user);
     const {password, ...result} = savedUser;
+
+
     return result;
   }
 
